@@ -1,0 +1,48 @@
+use vin
+switches to database named vin (creates it if not present)
+db.students.insertOne({name:"vinay", age:21})
+inserts a single document into students collection
+db.students.insertMany([{name:"sagar", age:22}, {name:"vedh", age:21}])
+inserts multiple documents at once
+db.students.find()
+displays all documents in the collection
+db.students.find().pretty()
+displays documents in formatted readable form
+db.students.find({age:21})
+returns documents where age is exactly 21
+db.students.find({age:{$gt:21}})
+returns documents where age is greater than 21
+db.students.find({age:{$lt:22}})
+returns documents where age is less than 22
+db.students.updateOne({name:"vinay"}, {$set:{age:22}})
+updates age to 22 for the first document matching name vinay
+db.students.updateMany({age:21}, {$inc:{age:1}})
+increments age by 1 for all documents where age is 21
+db.students.updateOne({name:"new"}, {$set:{age:23}}, {upsert:true})
+updates document if exists, otherwise inserts new document
+db.students.deleteOne({name:"vinay"})
+deletes the first document where name is vinay
+db.students.deleteMany({age:22})
+deletes all documents where age is 22
+db.students.find({age:{$in:[21,22]}})
+returns documents where age is either 21 or 22
+db.students.find({age:{$nin:[21]}})
+returns documents where age is not 21
+db.students.find({name:{$regex:"^v"}})
+returns documents where name starts with letter v
+db.students.find().sort({age:1})
+sorts documents in ascending order of age
+db.students.find().sort({age:-1})
+sorts documents in descending order of age
+db.students.find().limit(2)
+returns only first 2 documents
+db.students.find().skip(1)
+skips the first document and returns remaining
+db.students.countDocuments()
+returns total number of documents in collection
+db.students.find({}, {name:1, _id:0})
+displays only name field and hides _id field
+db.students.drop()
+deletes the entire students collection
+db.dropDatabase()
+deletes the current database completely
