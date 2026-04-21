@@ -1,0 +1,26 @@
+hdfs dfs -mkdir /hadooplab
+Creates a new directory named hadooplab in HDFS.
+
+ls
+Displays the list of files and folders in the local system.
+
+hdfs dfs -mkdir /hadooplab/input
+Creates a subdirectory named input inside hadooplab in HDFS.
+
+gedit sample.txt
+Creates and opens a file named sample.txt in the local system.
+
+ls
+Shows the updated list of local files including sample.txt.
+
+cat sample.txt
+Displays the content of the local file sample.txt.
+
+hdfs dfs -put sample.txt /hadooplab/input
+Uploads the local file sample.txt into the HDFS directory /hadooplab/input.
+
+hdfs dfs -ls /hadooplab/input
+Lists all files present inside the HDFS input directory.
+
+hdfs dfs -copyToLocal /hadooplab/input/sample.txt
+Copies the file from HDFS back to the local system.
