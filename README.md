@@ -6,5 +6,9 @@
 - [GPT Link](https://chatgpt.com/c/69e4678f-4d90-83a6-b26a-bdfcf8ffd407)
 
 wget --no-check-certificate http://raw.githubusercontent.com/arbazahmed07/wc/main/run.sh
+
+
 chmod +x run.sh
+
+
 bash run.sh
