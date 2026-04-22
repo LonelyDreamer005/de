@@ -1,24 +1,11 @@
-# Data Engineering Lab Manual (Organized)
+# Data Engineering Lab Manual (Simple and Complete)
 
-This document organizes the DE folder content into a single week-wise guide.
-
-## Folder Audit (Current Files)
-
-| File | Purpose / Content |
-|---|---|
-| `DE_Revise.ipynb` | Consolidated notebook with multiple DE practice cells (data handling, stats, plotting, preprocessing, etc.). |
-| `dummy.py` | Week-5 style feature construction: dummy coding, label encoding, binning. |
-| `wk4.py` | Week-4 preprocessing on AutoMPG: missing values, outlier treatment, capping. |
-| `pca.py` | Week-6 feature extraction: PCA, LDA, SVD, feature subset inspection. |
-| `hdfs.txt` | Week-7 HDFS command notes and sample workflow. |
-| `mongodb.txt` | Week-12/13 MongoDB command notes and examples. |
-| `README.md` | External links and resources. |
+This manual is written in a simple format and includes all required content directly in one place.
+Week 8 and Week 9 are excluded as requested.
 
 ---
 
 ## WEEK-1: Basic Data Handling Commands
-
-Use Pandas for all tasks.
 
 ```python
 import pandas as pd
@@ -27,80 +14,85 @@ import pandas as pd
 df = pd.read_csv("data.csv")
 
 # 2. Dimension of the data
-print("Rows, Columns:", df.shape)
+print("Shape:", df.shape)
 
-# 3. Display data (top 5 rows and total data)
-print(df.head(5))
+# 3. Display top 5 rows and full data
+print(df.head())
 print(df)
 
-# 4. List the column names
+# 4. List column names
 print(df.columns.tolist())
 
-# 5. Change columns of a data frame
-df.columns = ["col1", "col2", "col3"]  # same number as original columns
+# 5. Change column names (count must match)
+df.columns = ["col1", "col2", "col3"]
 
-# 6. Display specific single or multiple columns
-print(df["col1"])               # single column
-print(df[["col1", "col2"]])   # multiple columns
+# 6. Display single and multiple columns
+print(df["col1"])
+print(df[["col1", "col2"]])
 
-# 7. Bind sets of rows of dataframes (row-wise)
+# 7. Bind rows of dataframes
 df1 = pd.DataFrame({"A": [1, 2], "B": [3, 4]})
 df2 = pd.DataFrame({"A": [5, 6], "B": [7, 8]})
 row_bind = pd.concat([df1, df2], axis=0, ignore_index=True)
+print(row_bind)
 
-# 8. Bind sets of columns of dataframes (column-wise)
+# 8. Bind columns of dataframes
 col_bind = pd.concat([df1, df2], axis=1)
+print(col_bind)
 
-# 9. Find missing values in dataset
+# 9. Find missing values
 print(df.isnull().sum())
 print(df[df.isnull().any(axis=1)])
 ```
 
 ---
 
-## WEEK-2: Descriptive Statistics
+## WEEK-2: Measures and Statistics
 
 ```python
 import pandas as pd
 
 s = pd.Series([10, 20, 20, 30, 40, 50])
 
-# 1. Measures of central tendency
+# 1. Central tendency
 print("Mean:", s.mean())
 print("Median:", s.median())
 print("Mode:", s.mode().tolist())
 
-# 2. Measures of data spread
+# 2. Data spread
 print("Min:", s.min())
 print("Max:", s.max())
 print("Range:", s.max() - s.min())
 
-# 3. Dispersion: variance and standard deviation
+# 3. Dispersion
 print("Variance:", s.var())
 print("Standard Deviation:", s.std())
 
-# 4. Position: quartiles and IQR
+# 4. Quartiles and IQR
 q1 = s.quantile(0.25)
 q2 = s.quantile(0.50)
 q3 = s.quantile(0.75)
 iqr = q3 - q1
-print("Q1:", q1, "Q2:", q2, "Q3:", q3, "IQR:", iqr)
+print("Q1:", q1)
+print("Q2:", q2)
+print("Q3:", q3)
+print("IQR:", iqr)
 ```
 
 ---
 
-## WEEK-3: Basic Plots for Data Exploration (Iris Dataset)
+## WEEK-3: Basic Plots for Iris Dataset
 
 ```python
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.datasets import load_iris
-import pandas as pd
 
 iris_raw = load_iris()
 iris = pd.DataFrame(iris_raw.data, columns=iris_raw.feature_names)
 
-# 1. Box plot for each of four predictors
+# 1. Box plot for each predictor
 iris.plot(kind="box", subplots=True, layout=(2, 2), figsize=(10, 6), sharex=False, sharey=False)
 plt.tight_layout()
 plt.show()
@@ -129,121 +121,207 @@ plt.show()
 
 ## WEEK-4: Data Pre-Processing (AutoMPG)
 
-Reference implementation exists in `wk4.py`.
+Tasks:
+1. Remove outliers / missing values
+2. Impute standard values
+3. Cap values
 
-Tasks covered:
-1. Removing outliers / missing values
-2. Imputing standard values
-3. Capping values
+```python
+import pandas as pd
+import numpy as np
+from scipy import stats
 
-Suggested execution order:
-1. Load AutoMPG data
-2. Replace placeholder missing values (`?`) with NaN
-3. Convert numeric columns correctly
-4. Impute missing values (mean/median)
-5. Apply outlier handling (Percentile / Std Dev / IQR / Z-Score)
-6. Cap extreme values using quantiles
+# Load data
+df = pd.read_csv("auto-mpg.csv")
+
+# Handle missing values
+df.replace("?", np.nan, inplace=True)
+df["horsepower"] = pd.to_numeric(df["horsepower"], errors="coerce")
+df["horsepower"] = df["horsepower"].fillna(df["horsepower"].mean())
+
+# 1A. Outlier removal using Percentiles (for mpg)
+lower_p = df["mpg"].quantile(0.05)
+upper_p = df["mpg"].quantile(0.95)
+df_percentile = df[(df["mpg"] >= lower_p) & (df["mpg"] <= upper_p)]
+
+# 1B. Outlier removal using Standard Deviation
+mean = df["mpg"].mean()
+std = df["mpg"].std()
+df_std = df[(df["mpg"] >= mean - 3 * std) & (df["mpg"] <= mean + 3 * std)]
+
+# 1C. Outlier removal using IQR
+q1 = df["mpg"].quantile(0.25)
+q3 = df["mpg"].quantile(0.75)
+iqr = q3 - q1
+ll = q1 - 1.5 * iqr
+ul = q3 + 1.5 * iqr
+df_iqr = df[(df["mpg"] >= ll) & (df["mpg"] <= ul)]
+
+# 1D. Outlier removal using Z-score
+z = np.abs(stats.zscore(df["mpg"], nan_policy="omit"))
+df_zscore = df[z < 3]
+
+# 2. Impute standard values (mean and median example)
+df["mpg"] = df["mpg"].fillna(df["mpg"].mean())
+df["mpg"] = df["mpg"].fillna(df["mpg"].median())
+
+# 3. Capping values (winsorization style)
+lower_cap = df["mpg"].quantile(0.05)
+upper_cap = df["mpg"].quantile(0.95)
+df["mpg"] = np.where(df["mpg"] < lower_cap, lower_cap, df["mpg"])
+df["mpg"] = np.where(df["mpg"] > upper_cap, upper_cap, df["mpg"])
+
+print(df.head())
+```
 
 ---
 
 ## WEEK-5: Feature Construction
 
-Reference implementation exists in `dummy.py`.
-
-Tasks covered:
+Tasks:
 1. Dummy coding categorical (nominal) variables
 2. Encoding categorical (ordinal) variables
-3. Transforming numeric (continuous) to categorical features
+3. Transform numeric to categorical
 
-Notes:
-- Use `pd.get_dummies` for nominal columns.
-- Use `LabelEncoder` or custom mappings for ordinal columns.
-- Use `pd.cut` / `pd.qcut` for continuous-to-categorical conversion.
+```python
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+
+# Sample data
+df = pd.DataFrame({
+    "town": ["new york", "west windsor", "new york", "robinsville"],
+    "size": ["small", "medium", "large", "medium"],
+    "price": [250000, 550000, 700000, 400000]
+})
+
+# 1. Dummy coding for nominal variable: town
+dummies = pd.get_dummies(df["town"], prefix="town")
+df_dummy = pd.concat([df.drop(columns=["town"]), dummies], axis=1)
+
+# 2A. Ordinal encoding using custom mapping
+size_map = {"small": 1, "medium": 2, "large": 3}
+df_dummy["size_encoded"] = df_dummy["size"].map(size_map)
+
+# 2B. LabelEncoder example (usually for labels, not true ordinal meaning)
+le = LabelEncoder()
+df_dummy["size_label"] = le.fit_transform(df_dummy["size"])
+
+# 3. Continuous to categorical
+bins = [0, 300000, 600000, 1000000]
+labels = ["Low", "Medium", "High"]
+df_dummy["price_category"] = pd.cut(df_dummy["price"], bins=bins, labels=labels)
+
+print(df_dummy)
+```
 
 ---
 
 ## WEEK-6: Feature Extraction
 
-Reference implementation exists in `pca.py`.
-
-Tasks covered:
+Tasks:
 1. PCA
 2. SVD
 3. LDA
 4. Feature subset selection
 
-Recommended package set:
-- numpy
-- pandas
-- scikit-learn
-- matplotlib
-- seaborn
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.feature_selection import SelectKBest, f_classif
+
+# Load Iris data
+iris = load_iris()
+X = iris.data
+y = iris.target
+
+# 1. PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y)
+plt.title("PCA")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.show()
+
+# 2. SVD
+U, S, Vt = np.linalg.svd(X, full_matrices=False)
+plt.scatter(U[:, 0], U[:, 1], c=y)
+plt.title("SVD")
+plt.xlabel("Component 1")
+plt.ylabel("Component 2")
+plt.show()
+
+# 3. LDA
+lda = LinearDiscriminantAnalysis(n_components=2)
+X_lda = lda.fit(X, y).transform(X)
+plt.scatter(X_lda[:, 0], X_lda[:, 1], c=y)
+plt.title("LDA")
+plt.xlabel("LD1")
+plt.ylabel("LD2")
+plt.show()
+
+# 4. Feature subset selection
+selector = SelectKBest(score_func=f_classif, k=2)
+X_selected = selector.fit_transform(X, y)
+selected_indices = selector.get_support(indices=True)
+print("Selected feature indices:", selected_indices)
+print("Selected feature names:", [iris.feature_names[i] for i in selected_indices])
+```
 
 ---
 
 ## WEEK-7: HDFS (Storage)
 
-Reference command set exists in `hdfs.txt`.
-
-### A. Hadoop Storage File System
-
-1. Create directory structure in HDFS
+### A. Create directory structure in HDFS
 
 ```bash
 hdfs dfs -mkdir /hadooplab
 hdfs dfs -mkdir /hadooplab/input
 ```
 
-2. Create local files and move to HDFS
+### B. Create local file and move to HDFS
 
 ```bash
-echo "sample data" > sample.txt
+echo "sample text for hdfs" > sample.txt
 hdfs dfs -put sample.txt /hadooplab/input
 ```
 
-### B. View data, files, and directories
-
-1. See files in HDFS directory
+### C. View files and file contents in HDFS
 
 ```bash
 hdfs dfs -ls /hadooplab/input
-```
-
-2. View file contents in HDFS
-
-```bash
 hdfs dfs -cat /hadooplab/input/sample.txt
 ```
 
-### C. Copy file from HDFS to local disk
+### D. Copy file from HDFS to local disk
 
 ```bash
 hdfs dfs -copyToLocal /hadooplab/input/sample.txt ./sample_from_hdfs.txt
 ```
 
-Lab objective:
-- Move data from local to HDFS before processing.
+### Lab objective
+Move data from local system to HDFS before processing.
 
 ---
 
 ## WEEK-8 & WEEK-9: Excluded
 
-As requested, MapReduce week content is intentionally omitted.
+MapReduce section intentionally omitted as requested.
 
 ---
 
-## WEEK-10 & WEEK-11: Hive (NoSQL Query Language for Big Data)
+## WEEK-10 & WEEK-11: Hive
 
-Problem statement:
-- Table: `user_data`
-- Columns:
-  - `data_date` string
-  - `user_id` string
-  - `properties` string
-- Sample `properties` format:
-  - `Age=21;state=CA;gender=M;`
+Problem:
+- Table name: user_data
+- Fields: data_date, user_id, properties
+- properties format example: Age=21;state=CA;gender=M;
 
-### 1. Create table in Hive
+### 1. Create table
 
 ```sql
 CREATE TABLE IF NOT EXISTS user_data (
@@ -262,7 +340,7 @@ STORED AS TEXTFILE;
 LOAD DATA INPATH '/hadooplab/input/user_data.csv' INTO TABLE user_data;
 ```
 
-### 3. Extract each property and compute min, max, unique-count
+### 3. List each property with min, max, unique count
 
 ```sql
 WITH kv AS (
@@ -282,7 +360,7 @@ FROM kv
 GROUP BY property_name;
 ```
 
-### 4. Generate a count per state
+### 4. Generate count per state
 
 ```sql
 WITH states AS (
@@ -297,7 +375,7 @@ GROUP BY state
 ORDER BY state_count DESC;
 ```
 
-### 5. Number of records per state (alternate explicit extraction)
+### 5. Number of records per state
 
 ```sql
 SELECT
@@ -312,59 +390,84 @@ ORDER BY records_per_state DESC;
 
 ## WEEK-12 & WEEK-13: MongoDB
 
-Reference command set exists in `mongodb.txt`.
+Tasks:
+1. Create database and run basic commands
+2. Explore data types
+3. Insert sample data and query with MQL
 
-### Core tasks
-1. Create and switch database
-2. Insert single and multiple documents
-3. Query documents using filters
-4. Update and upsert documents
-5. Delete documents
-6. Sort, limit, skip, project fields
-7. Count documents
-8. Drop collection and database
+### Common MongoDB data types
+- String
+- Number (int, long, double, decimal)
+- Boolean
+- Date
+- Array
+- Object (embedded document)
+- Null
+- ObjectId
 
-### Sample command flow
+### Commands
 
 ```javascript
-use vin
+// Create/switch database
+use de_lab
 
-db.students.insertOne({name: "vinay", age: 21})
+// Insert one document
+db.students.insertOne({
+  name: "Vinay",
+  age: 21,
+  active: true,
+  joinedOn: new Date(),
+  skills: ["python", "hadoop"],
+  address: {city: "Hyderabad", pin: 500001}
+})
+
+// Insert many documents
 db.students.insertMany([
-  {name: "sagar", age: 22},
-  {name: "vedh", age: 21}
+  {name: "Sagar", age: 22, state: "TS"},
+  {name: "Vedh", age: 21, state: "AP"},
+  {name: "Nina", age: 23, state: "TS"}
 ])
 
+// Read
+db.students.find()
 db.students.find().pretty()
+
+// Filter
+db.students.find({age: 21})
 db.students.find({age: {$gt: 21}})
+db.students.find({state: {$in: ["TS", "AP"]}})
+db.students.find({name: {$regex: "^V"}})
 
-db.students.updateOne({name: "vinay"}, {$set: {age: 22}})
-db.students.updateMany({age: 21}, {$inc: {age: 1}})
+// Projection
+db.students.find({}, {name: 1, age: 1, _id: 0})
 
+// Sort, limit, skip
+db.students.find().sort({age: 1})
 db.students.find().sort({age: -1}).limit(2)
+db.students.find().skip(1)
 
+// Update
+db.students.updateOne({name: "Vinay"}, {$set: {age: 22}})
+db.students.updateMany({state: "TS"}, {$inc: {age: 1}})
+db.students.updateOne({name: "Ravi"}, {$set: {age: 24, state: "KA"}}, {upsert: true})
+
+// Delete
+db.students.deleteOne({name: "Vinay"})
+db.students.deleteMany({age: {$gte: 30}})
+
+// Count
 db.students.countDocuments()
 
+// Drop
 db.students.drop()
 db.dropDatabase()
 ```
 
 ---
 
-## Quick Run Checklist
+## Quick Checklist
 
-1. Keep datasets in project root or set full paths explicitly.
-2. Install required Python packages before running scripts.
-3. Validate schema and missing values before preprocessing.
-4. For Hive and HDFS labs, ensure Hadoop services are running.
-5. For MongoDB labs, ensure `mongod` service is active.
-
----
-
-## Where Existing Week Files Are Located
-
-- Week-4: `wk4.py`
-- Week-5: `dummy.py`
-- Week-6: `pca.py`
-- Week-7: `hdfs.txt`
-- Week-12/13: `mongodb.txt`
+1. Install Python packages: pandas, numpy, scipy, scikit-learn, matplotlib, seaborn.
+2. Keep datasets in correct path (or use full file path).
+3. Start Hadoop and HDFS services before Week-7 and Hive tasks.
+4. Start MongoDB service before Week-12 and Week-13 tasks.
