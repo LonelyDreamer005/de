@@ -12,3 +12,11 @@ chmod +x run.sh
 
 
 bash run.sh
+
+
+## To get in notepad
+
+
+curl -L -o run.sh https://raw.githubusercontent.com/arbazahmed07/wc/main/run.sh
+
+notepad run.sh
