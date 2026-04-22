@@ -56,3 +56,18 @@ plt.xlabel("Component 1")
 plt.ylabel("Component 2")
 plt.title("SVD")
 plt.show()
+
+
+# 4. Feature subset selection
+
+import pandas as pd
+from sklearn.datasets import load_iris
+
+df = pd.DataFrame(load_iris().data)
+
+print(df.corr())
+# for correlation matrix, use below code. 
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.heatmap(df.corr(method='pearson'),annot=True)
+plt.show()
