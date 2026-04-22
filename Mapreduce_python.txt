@@ -1,0 +1,41 @@
+🔹 Create Mapper file
+nano mapper.py
+
+Paste:
+
+import sys
+for line in sys.stdin:
+    for w in line.strip().split():
+        print(f"{w}\t1")
+🔹 Create Reducer file
+nano reducer.py
+
+Paste:
+
+import sys
+d={}
+for line in sys.stdin:
+    w,c=line.strip().split("\t"); d[w]=d.get(w,0)+int(c)
+for k,v in d.items(): print(k,v)
+✅ Step 2: Give Permission
+chmod +x mapper.py reducer.py
+✅ Step 3: Create Input File
+echo "hello world hello" > input.txt
+✅ Step 4: Run Locally (Without Hadoop)
+
+👉 Quick test:
+
+cat input.txt | python3 mapper.py | sort | python3 reducer.py
+
+✔ Output:
+
+hello 2
+world 1
+✅ Step 5: Run in Hadoop (Streaming)
+hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming*.jar \
+-mapper mapper.py \
+-reducer reducer.py \
+-input input.txt \
+-output output
+✅ Step 6: View Output
+hdfs dfs -cat output/part-00000
