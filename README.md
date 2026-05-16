@@ -8,11 +8,35 @@
 
 wget --no-check-certificate http://raw.githubusercontent.com/arbazahmed07/wc/main/run.sh
 
-
 chmod +x run.sh
 
+bash run.sh
+
+### Execution of 'wordcount.java'
+
+wget --no-check-certificate http://raw.githubusercontent.com/arbazahmed07/wc/main/run.sh
+
+chmod +x run.sh
 
 bash run.sh
 
 
+the above is to run
 
+
+ls
+
+cd mapreduce
+
+ls
+
+cat WordCount.java
+
+
+the above is for location of code and output
+
+the below is to show sir
+
+hdfs dfs -ls /output
+
+hdfs dfs -cat /output/part-r-00000
